@@ -31,7 +31,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+<<<<<<< HEAD
 ALLOWED_HOSTS = []
+=======
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+>>>>>>> master
 
 
 # Application definition
@@ -45,6 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+<<<<<<< HEAD
+=======
+    
+    'django_celery_beat',
+    'django_celery_results',
+>>>>>>> master
 
     'users',
     'stores',
@@ -110,6 +120,7 @@ ROOT_URLCONF = 'learning_django.urls'
 # EMAIL_HOST_PASSWORD = ""  # No authentication needed
 # DEFAULT_FROM_EMAIL = "test@example.com"  # Change as needed
 
+<<<<<<< HEAD
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
 EMAIL_HOST = os.getenv("EMAIL_HOST") 
 EMAIL_PORT = os.getenv("EMAIL_PORT")  
@@ -120,6 +131,36 @@ EMAIL_USE_SSL = False  # No SSL required for smtp4dev
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER") or ""  # Set to "" if None
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") or ""  # Set to "" if None
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")  
+=======
+# EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+# EMAIL_HOST = os.getenv("EMAIL_HOST") 
+# EMAIL_PORT = os.getenv("EMAIL_PORT")  
+# # EMAIL_USE_TLS = bool(os.getenv("EMAIL_USE_TLS"))  not getting from env so i have to change here
+# # EMAIL_USE_SSL = bool(os.getenv("EMAIL_USE_SSL"))
+# EMAIL_USE_TLS = False  # No TLS required for smtp4dev
+# EMAIL_USE_SSL = False  # No SSL required for smtp4dev
+# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER") or ""  # Set to "" if None
+# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD") or ""  # Set to "" if None
+# DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")  
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', '192.168.3.127')  # Correct SMTP server
+EMAIL_PORT = os.getenv('EMAIL_PORT', 5025)
+EMAIL_USE_TLS = False  # You already have this set
+EMAIL_USE_SSL = False  # As you mentioned, no SSL needed
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'dev@dev.com')
+
+
+CELERY_BROKER_URL = f"{os.getenv('REDIS_BROKER_URL')}:{os.getenv('REDIS_BROKER_PORT')}"
+CELERY_RESULT_BACKEND = f"{os.getenv('REDIS_BROKER_URL')}:{os.getenv('REDIS_BROKER_PORT')}"
+CELERY_BROKER_PORT = os.getenv('REDIS_BROKER_PORT')
+CELERY_ACCEPT_CONTENT = [str(os.getenv('REDIS_ACCEPT_CONTENT'))]
+CELERY_TASK_SERIALIZER = str(os.getenv('REDIS_TASK_SERIALIZER'))
+CELERY_RESULT_SERIALIZER = str(os.getenv('REDIS_RESULT_SERIALIZER'))
+CELERY_TIMEZONE =os.getenv('TIME_ZONE')
+
+
+
+>>>>>>> master
 
 TEMPLATES = [
     {
@@ -180,8 +221,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+<<<<<<< HEAD
 TIME_ZONE = 'UTC'
 
+=======
+TIME_ZONE = os.getenv('TIME_ZONE')
+# TIME_ZONE = 'Asia/Karachi'  # Set this to Pakistan Standard Time (PKT)
+    
+>>>>>>> master
 USE_I18N = True
 
 USE_TZ = True

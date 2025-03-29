@@ -68,11 +68,19 @@ class CoreUser(AbstractBaseUser):
 class PasswordReset(models.Model):
 
     id = models.UUIDField(_("ID"), default=uuid.uuid4, primary_key=True, unique=True)
+<<<<<<< HEAD
     user = models.ForeignKey(CoreUser, verbose_name=_("Of User"), on_delete=models.CASCADE)
     code = models.CharField(_("Verification Code"),null=False, blank=False)
     used = models.BooleanField(_("Used Code"), default=False)
     created_at = models.DateTimeField("created_at", auto_now_add=True)
 
+=======
+    user_id = models.ForeignKey(CoreUser, verbose_name=_("Of User"), on_delete=models.CASCADE)
+    code = models.CharField(_("Verification Code"),null=False, blank=False)
+    used = models.BooleanField(_("Used Code"), default=False)
+    created_at = models.DateTimeField("created_at", auto_now_add=True)
+    activate = models.BooleanField('Activate',default=True)
+>>>>>>> master
     def __str__(self):
         return f"{self.user_id}--->{self.code}"
 
@@ -86,7 +94,13 @@ class PasswordReset(models.Model):
         super().save( *args, **kwargs)
     def is_expired(self):
         return now() > self.created_at + timedelta(minutes=10)
+<<<<<<< HEAD
 
+=======
+    def deactivate_previous_code(self):
+        self.activate=False
+        self.save()
+>>>>>>> master
 
     def mark_as_used(self):
         self.used=True
@@ -95,17 +109,29 @@ class PasswordReset(models.Model):
 class Verify_Email(models.Model):
 
     id = models.UUIDField(_("ID"), default=uuid.uuid4, primary_key=True, unique=True)
+<<<<<<< HEAD
     user = models.ForeignKey(CoreUser, verbose_name=_("Of User"), on_delete=models.CASCADE)
     code = models.CharField(_("Verification Code"),null=False, blank=False)
     used = models.BooleanField(_("Used Code"), default=False)
     created_at = models.DateTimeField("created_at", auto_now_add=True)
 
+=======
+    user_id = models.ForeignKey(CoreUser, verbose_name=_("Of User"), on_delete=models.CASCADE)
+    code = models.CharField(_("Verification Code"),null=False, blank=False)
+    used = models.BooleanField(_("Used Code"), default=False)
+    created_at = models.DateTimeField("created_at", auto_now_add=True)
+    activate = models.BooleanField('Activate', default=True)
+>>>>>>> master
     def __str__(self):
         return f"{self.user_id}--->{self.code}"
 
     def generate_code(self, length=8):
         chars = string.ascii_uppercase + string.digits
+<<<<<<< HEAD
         self.code = ''.join(secrets.choice(chars) for _ in range(length))
+=======
+        return ''.join(secrets.choice(chars) for _ in range(length))
+>>>>>>> master
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -116,9 +142,17 @@ class Verify_Email(models.Model):
     
     def pending_request_in_last_10_min(self):
         ten_minutes_ago = now() - timedelta(minutes=10)
+<<<<<<< HEAD
         request_count = Verify_Email.objects.filter(user=self.user, created_at__gte=ten_minutes_ago).count()
         return request_count >= 2  
 
+=======
+        request_count = Verify_Email.objects.filter(user_id=self.user_id, created_at__gte=ten_minutes_ago).count()
+        return request_count >= 2  
+    def deactivate_previus_code(self):
+        self.activate=False
+        self.save()
+>>>>>>> master
     
     def mark_as_used(self):
         self.used=True

@@ -3,7 +3,11 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from users.permissions import IsAuthenticatedAndVerified
 from rest_framework.response import Response
 from rest_framework import status   
+<<<<<<< HEAD
 from users.serializer import UserSignUpSerializer,EmailSignInSerializer,LogOutAPISerializer,AuthPassReset,EmailPassResetRequest,PasswordChangeEmailCode,RefreshTokenSerializer,UserProfileSerializer,GoogleLoginSerializer,VerifyUserMailSendSerializer
+=======
+from users.serializer import UserSignUpSerializer,EmailSignInSerializer,LogOutAPISerializer,AuthPassReset,EmailPassResetRequest,PasswordChangeEmailCode,RefreshTokenSerializer,UserProfileSerializer,GoogleLoginSerializer,VerifyUserMailSendSerializer,VerifyUserSerializer
+>>>>>>> master
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth import logout
 import datetime
@@ -11,6 +15,7 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken,Out
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 import requests
+<<<<<<< HEAD
 # class VerifyUser(APIView):
 #     permission_classes=[IsAuthenticated]
 #     def post(self,request):
@@ -28,6 +33,29 @@ import requests
 #                     "success":False,
 #                     "message":f"Unexpected error--> {str(e)}"
 #                 }, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+=======
+class VerifyUser(APIView):
+    permission_classes=[AllowAny]
+    def post(self,request):
+        try:
+            serializer=VerifyUserSerializer(data = request.data)
+            if serializer.is_valid():
+                serializer.update_user_status(serializer.validated_data)
+                return Response({
+                    "success":True,
+                    "message":"Email Verified Correctly"
+                },status.HTTP_200_OK)
+            else:
+                return Response({
+                    "success": False,
+                    "errors": serializer.errors
+                    }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+                return Response({
+                    "success":False,
+                    "message":f"Unexpected error--> {str(e)}"
+                }, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+>>>>>>> master
 class VerifyUserMailSend(APIView):
     permission_classes=[AllowAny]
     def post(self,request):

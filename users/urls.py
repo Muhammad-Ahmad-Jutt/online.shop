@@ -1,5 +1,9 @@
 from django.urls import path, include
+<<<<<<< HEAD
 from users.views import Sign_Up_API, Sign_In_API,Log_Out_API,Password_Reset_Api_Authenticated,Password_Reset_Email_Send,Password_Reset_Api_code,RefreshAccessToken,UserProfile,GoogleLogin,VerifyUserMailSend
+=======
+from users.views import Sign_Up_API, Sign_In_API,Log_Out_API,Password_Reset_Api_Authenticated,Password_Reset_Email_Send,Password_Reset_Api_code,RefreshAccessToken,UserProfile,GoogleLogin,VerifyUserMailSend,VerifyUser
+>>>>>>> master
 
 urlpatterns = [
 path('signup/', Sign_Up_API.as_view(), name='signup_api'),  # POST - Register new user
@@ -11,7 +15,12 @@ path("password_reset_code_confirm/", Password_Reset_Api_code.as_view(), name='pa
 path("refresh_access_token/", RefreshAccessToken.as_view(), name="refresh_access_token"),  # POST - Refresh JWT access token
 path("user_profile/", UserProfile.as_view(), name='user_profile'),  # GET - Fetch profile, PUT - Update profile
 path("google_login/", GoogleLogin.as_view(), name='Google Login'), # POST
+<<<<<<< HEAD
 path("verify_account/", VerifyUserMailSend.as_view(), name='Verify Account')
+=======
+path("verify_account/", VerifyUserMailSend.as_view(), name='Verify Account'),# POST
+path("verify_code/", VerifyUser.as_view(), name='Verify Account')# POST
+>>>>>>> master
     # Django's built-in authentication URLs (includes login, logout, password reset, etc.)
     # path('auth/', include('django.contrib.auth.urls')),
 ]

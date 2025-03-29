@@ -3,21 +3,57 @@ from rest_framework import serializers
 from users.models import CoreUser,PasswordReset,Verify_Email
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
+<<<<<<< HEAD
 from utils.auth import send_mail_to_user
+=======
+from users.tasks import send_mail_to_user
+>>>>>>> master
 from rest_framework_simplejwt.views import token_refresh
 from datetime import timedelta
 from django.utils import timezone
 import requests,json
 # Configure logging
 logger = logging.getLogger(__name__)
+<<<<<<< HEAD
 # class VerifyUserSerializer(serializers.Serializer):
 #     def validate(self,data):
+=======
+class VerifyUserSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField()
+    def validate(self,data):
+        try:
+            email = data['email']
+            code = data['code'] 
+            user = CoreUser.objects.filter(email = email).first()
+            data['user']=user
+            if not user:
+                raise serializers.ValidationError(f"Email is not registered")
+            else:
+                code = Verify_Email.objects.filter(user_id=user,code=code,used=False,activate=True).first()
+                if code.is_expired():
+                    raise serializers.ValidationError("Code is used or expired")
+                else:
+                    code.used=True
+                    code.activate=False
+                    code.save()
+        except Exception as e:
+            logger.error(f'[Verify User Serializer] Throws exception {e}')
+            raise serializers.ValidationError(f"Invalid or Expired Code ------->,{e}")
+        return data
+    def update_user_status(self, validated_data):
+        user = validated_data['user']
+        user.verified=True
+        user.save()
+        send_mail_to_user.delay(user.email,'Your email has been verified',"Notification for Verification")
+>>>>>>> master
 class VerifyUserMailSendSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate(self,data):
         try:
             email = data["email"]
+<<<<<<< HEAD
             user = CoreUser.objects.filter(email=email).first()
             if not email:
                 raise serializers.ValidationError('No email provided')
@@ -33,6 +69,27 @@ class VerifyUserMailSendSerializer(serializers.Serializer):
                 send_mail_to_user(user.email,f'Verify email with this code --->{code.code}', 'Verify Email Address')
         except Exception as e:
             logger.error(f'[Continue with google] throws exception {e}')
+=======
+
+            if not email:
+                raise serializers.ValidationError('No email provided')
+            
+            user = CoreUser.objects.filter(email=email).first()
+            if user.verified==True:
+                raise serializers.ValidationError("User is already verified")
+            ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+            request_count = Verify_Email.objects.filter(user_id=user, created_at__gte=ten_minutes_ago, used=False).count()
+            if request_count>=2:
+                raise serializers.ValidationError("User already have two pending request wait for 10 minutes")
+            else:
+                deactivate_previous_code = Verify_Email.objects.filter(user_id=user).all().update(activate=False)
+                code = Verify_Email(user_id=user)
+                code.generate_code()
+                code.save()
+                send_mail_to_user.delay(user.email,f'Verify email with this code --->{code.code}', 'Verify Email Address')
+        except Exception as e:
+            logger.error(f'[VerifyUserMailSendSerializer] throws exception {e}')
+>>>>>>> master
             raise serializers.ValidationError(f"Invalid or Expired Code---->,{e}")
         return data
 class GoogleLoginSerializer(serializers.Serializer):
@@ -55,7 +112,11 @@ class GoogleLoginSerializer(serializers.Serializer):
                 verified=True
                 user,created = CoreUser.objects.get_or_create(name=name, email=email,first_name=first_name, last_name=last_name, profile_link=profile_link, verified=True,google_token=google_token)
                 if created:
+<<<<<<< HEAD
                     send_mail_to_user(email, 'To Generate your new password, visit reset password in account settings', 'Password Generate Notification')
+=======
+                    send_mail_to_user.delay(email, 'To Generate your new password, visit reset password in account settings', 'Password Generate Notification')
+>>>>>>> master
 
         except Exception as e:
             logger.error(f'[Continue with google] throws exception {e}')
@@ -101,7 +162,11 @@ class PasswordChangeEmailCode(serializers.Serializer):
             password = data['password']
             code = data['code']
             user = CoreUser.objects.filter(email=email).first()
+<<<<<<< HEAD
             password_reset = PasswordReset.objects.filter(user=user, code=code, used=False).first()
+=======
+            password_reset = PasswordReset.objects.filter(user_id=user, code=code, used=False,activate=True).first()
+>>>>>>> master
             if not password_reset or password_reset.is_expired():  # Check expiration here
                 raise serializers.ValidationError("Invalid or expired code.")
             data['message']='Code Confirmed'
@@ -122,10 +187,17 @@ class PasswordChangeEmailCode(serializers.Serializer):
         user.save()
         
         # Mark password reset code as used
+<<<<<<< HEAD
         password_reset = PasswordReset.objects.filter(user=user, code=self.validated_data["code"]).first()
         if password_reset:
             password_reset.mark_as_used()
         send_mail_to_user(self.validated_data['email'],'Password Changed Successfull','Password Change Notification')
+=======
+        password_reset = PasswordReset.objects.filter(user_id=user, code=self.validated_data["code"]).first()
+        if password_reset:
+            password_reset.mark_as_used()
+        send_mail_to_user.delay(self.validated_data['email'],'Password Changed Successfull','Password Change Notification')
+>>>>>>> master
 
 class EmailPassResetRequest(serializers.Serializer):
     email = serializers.EmailField()
@@ -135,6 +207,7 @@ class EmailPassResetRequest(serializers.Serializer):
             email=data['email']
             
             user = CoreUser.objects.filter(email=email).first()
+<<<<<<< HEAD
             request_count = PasswordReset.objects.filter(user=user, created_at__gte=ten_minutes_ago, used=False).count()
             if request_count>=2:
                 raise serializers.ValidationError("User already have two pending request wait for 10 minutes")
@@ -150,6 +223,28 @@ class EmailPassResetRequest(serializers.Serializer):
                 data["status"]=True
         except Exception as e:
             logger.err  or(f'[send_email_on_account_registration] throws exception {e}')
+=======
+            request_count = PasswordReset.objects.filter(user_id=user, used=False).all()
+            req_count=0
+            for request in request_count:
+                if request.is_expired():
+                    continue
+                else:
+                    req_count+=1
+            if req_count>=2:
+                raise serializers.ValidationError("User already have two pending request wait for 10 minutes")
+            else:
+                deactivate_previous_code=PasswordReset.objects.filter(user_id=user).all().update(activate=False)
+                subject = 'Applicaiton Password Reset Code'
+                code = PasswordReset(user_id=user)
+                code.generate_code()
+                code.save()
+                message = f"Your Password Reset Code is {code.code} \n Code will be expire after 10 minutes."
+                send_mail_to_user.delay(email,message,subject)
+                data["status"]=True
+        except Exception as e:
+            logger.error(f'[send_email_on_account_registration] throws exception {e}')
+>>>>>>> master
             raise serializers.ValidationError("Email not found")
         return data
 
