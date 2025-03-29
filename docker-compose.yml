@@ -1,0 +1,59 @@
+version: '3'
+
+volumes:
+  store-volume:
+  db-volume:
+  smtp_Dev:
+  
+networks:
+  learning_django_network:
+    driver: bridge
+
+services:
+  store:
+    container_name: store_management_container
+    command: bash -c "python manage.py makemigrations --noinput || echo 'Error While making migration ' && python manage.py migrate || echo 'Error while migrating ' && celery -A learning_django worker --loglevel=info & python manage.py runserver 0.0.0.0:9000"
+    build: .
+    ports:
+      - 9001:9000
+    volumes:
+      - 'store-volume:/store-data/'
+    env_file:
+      - .env  # Automatically load environment variables from .env file
+    networks:
+      - learning_django_network
+
+  db:
+    image: postgres:latest
+    container_name: db_service
+    volumes:
+      - 'db-volume:/var/lib/postgresql/data'
+    ports:
+      - ${POSTGRES_EXTERNAL_PORT}:${POSTGRES_EXTERNAL_PORT}
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TZ=${TIME_ZONE}  # Set the time zone (e.g., Asia/Karachi or UTC)
+    networks:
+      - learning_django_network
+  redis:
+    image: redis:7.0.5-alpine
+    restart: unless-stopped
+    container_name: redis_service
+    ports:
+      - ${REDIS_EXTERNAL_PORT}:${REDIS_EXTERNAL_PORT}
+    networks:
+      - learning_django_network
+  smtp:
+    image: rnwood/smtp4dev
+    container_name: smtp_service
+    ports:
+      - "5025:25"    # SMTP port
+      - "5080:80"    # Web UI
+      - "5443:443"   # HTTPS Web UI
+    volumes:
+      - smtp_Dev:/smtp4dev
+    restart: no
+    networks:
+      - learning_django_network
